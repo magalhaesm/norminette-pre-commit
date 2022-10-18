@@ -1,0 +1,1 @@
+# norminette-pre-commit
