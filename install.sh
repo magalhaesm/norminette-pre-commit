@@ -36,7 +36,7 @@ EOF
 )
 
 if [[ -d $PWD/.git/hooks ]]; then
-  echo "$script" | tee > .git/hooks/pre-commit
+  echo "$script" > .git/hooks/pre-commit
   chmod +x .git/hooks/pre-commit
   echo 'Done!'
 else
