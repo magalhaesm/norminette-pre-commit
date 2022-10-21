@@ -11,12 +11,28 @@ script=$(cat << EOF
 RESET='\033[m'
 YELLOW='\033[1;33m'
 
+IGNORE=".normignore"
+
+check_ignored() {
+  if ! norminette "\$1" | grep "^Error" | grep -qivf "\$IGNORE"; then
+    return 1
+  fi
+}
+
+normal_check() {
+  norminette "\$1" | grep -q "^Error"
+}
+
 stop_message() {
   echo -e "\${YELLOW}COMMIT REJECTED\${RESET}: norm error!"
 }
 
-check_norm_error () {
-  norminette "\$1" | grep -q 'Error!' && stop_message
+check_norm_error() {
+  if [[ -f "\$IGNORE" ]]; then
+    check_ignored "\$1"
+  else
+    normal_check "\$1"
+  fi
 }
 
 main() {
@@ -24,7 +40,10 @@ main() {
     filename=\$(basename "\$file")
     case "\$filename" in
       *.h | *.c)
-        check_norm_error "\$file" && exit 1
+        if check_norm_error "\$file"; then
+          stop_message
+          exit 1
+        fi
       ;;
     esac
   done
